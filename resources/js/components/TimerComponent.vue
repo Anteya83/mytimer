@@ -5,8 +5,8 @@
 <h1>Мои проекты</h1>
     <div class="col-md-12 col-md-offset-2">
         <div class="col-2"> <CreateProjectComponent ref="creat"></CreateProjectComponent></div>
-        <div class="no-projects" v-if="projects">
             <hr>
+        <div class="no-projects" v-if="projects">
 
             <div v-if="projects.length > 0">
                 <div class="panel panel-default" v-for="project in projects" :key="project.id">
@@ -17,6 +17,7 @@
                         <template v-if="project.tasks.length !== 0">
                             <button class="btn btn-success btn-sm  col-4"   data-bs-toggle="collapse"  :data-bs-target="getStrForId(project.id, true)" :aria-controls="getStrForId(project.id)" :id="getStrForId(project.id, true)" @click="clickBtn(getStrForId(project.id, true))" aria-expanded="false">Показать задачи</button>
                         </template>
+
                         <template v-else> <span class="btn btn-success btn-sm  col-4">У проекта пока нет задач</span></template>
                         <button type="button" class="btn btn-sm btn-warning col-4" data-bs-toggle="modal" data-bs-target="#exampleModal" @click.prevent="getId(project.id)"  data-bs-whatever="@mdo">+ Задача</button>
                         <a href="#"  @click.prevent="changeEditProjectId(project.id, project.name)" class="btn btn-success btn-sm col-4">Редактировать</a>
@@ -25,7 +26,9 @@
 
 
                     <div :class="isEdit(project.id) ? '' :'d-none'" class="row" >
-                        <span class="pull-right col-5"><input type="text" v-model="projectName" class="form-control " ></span>
+                        <span class="pull-right col-5"><input type="text" v-model="projectName" class="form-control " placeholder="Введите от 2 до 25 символов">
+                         </span>
+
                          <a href="#" @click.prevent="updateProject(project.id)" class="btn btn-success btn-sm col-3 mb-lg-5">Обновить</a>
                          <a href="#" @click.prevent="updateProject(project.id,true)" class="btn btn-warning btn-sm col-4 mb-lg-5" >Закрыть</a>
                     </div>
@@ -88,6 +91,7 @@ import axios from "axios";
             idProject:null,
             timer: 0,
             projects2: null,
+            message:false,
         }
     },
 
@@ -109,11 +113,15 @@ import axios from "axios";
           if(close) return  this.editProjectId=this.id;
           else{
               this.editProjectId = null;
-              //console.log(this.projectName);
               axios.patch(`/api/project/${id}`, {name: this.projectName})
                   .then(res=>{
                       this.getProject();
                   })
+                  .catch((error)=>{
+                      this.message = (error.response.data.message);
+                  })
+
+
           }
 
       },

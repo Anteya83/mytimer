@@ -18,14 +18,14 @@ class Project extends Model
     protected $with = ['user'];
 
     public function user(){
-        return $this->belongsTo(User::class);//проект относится к одному юзеру
+        return $this->belongsTo(User::class);
     }
 
     public function tasks(){
-        return $this->hasMany(Task::class);//задачи относятся к одному проекту
+        return $this->hasMany(Task::class);
     }
     public function scopeActive($query){
-        return $query->where('created_by',(auth()->user()->id));//ограничиваем проекты только теми которые относятся к одному юзеру
+        return $query->where('created_by',(auth()->user()->id));
 
     }
 }
