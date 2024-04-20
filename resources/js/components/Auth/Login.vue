@@ -34,7 +34,7 @@ export default {
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('user', JSON.stringify(data.user));
 
-                    this.$router.push('/dashboard');
+                    this.$router.push('/home');
                 })
                 .catch((error) => {
                     console.log(error);

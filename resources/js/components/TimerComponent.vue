@@ -13,7 +13,7 @@
 
                     <div class="panel-heading clearfix row mb-lg-3" :class="(isEdit(project.id)) ? 'd-none' :''">
                        <div class="col-8"> <h4 class="pull-right ">{{ project.name }}</h4></div>
-                        <span class="col-4 ">На проект затрачено : {{getTotalTimeForProject(project.tasks, false)}}</span>
+                        <span class="col-4 ">На проект затрачено : {{getTotalTime(project.tasks, false)}}</span>
                         <template v-if="project.tasks.length !== 0">
                             <button class="btn btn-success btn-sm  col-4"   data-bs-toggle="collapse"  :data-bs-target="getStrForId(project.id, true)" :aria-controls="getStrForId(project.id)" :id="getStrForId(project.id, true)" @click="clickBtn(getStrForId(project.id, true))" aria-expanded="false">Показать задачи</button>
                         </template>
@@ -30,7 +30,7 @@
                          </span>
 
                          <a href="#" @click.prevent="updateProject(project.id)" class="btn btn-success btn-sm col-3 mb-lg-5">Обновить</a>
-                         <a href="#" @click.prevent="updateProject(project.id,true)" class="btn btn-warning btn-sm col-4 mb-lg-5" >Закрыть</a>
+                        <a href="#" @click.prevent="changeEditProjectId(null)" class="btn btn-warning btn-sm col-4 mb-lg-5" >Закрыть</a>
                     </div>
 
                     <div class="panel-body collapse multi-collapse mb-lg-5" :id="getStrForId(project.id)">
@@ -48,7 +48,7 @@
                                     <tbody>
                                     <tr class="">
                                         <th scope="row">{{ task.name }}</th>
-                                        <td class="">На задачу затрачено : {{ getTotalTimeForProject(false,task) }}</td>
+                                        <td class="">На задачу затрачено : {{ getTotalTime(false,task) }}</td>
 
                                         <td>
                                             <template v-if="task.start == null">
@@ -86,11 +86,10 @@ import axios from "axios";
             projects: null,
             newTimerName: '',
             newProjectName: null,
-            editProjectId:null,
+            editProjectId:null,//id проекта который открыт для редакт
             projectName: '',
             idProject:null,
             timer: 0,
-            projects2: null,
             message:false,
         }
     },
@@ -109,9 +108,7 @@ import axios from "axios";
               })
       },
 
-         updateProject(id, close=false){
-          if(close) return  this.editProjectId=this.id;
-          else{
+         updateProject(id){
               this.editProjectId = null;
               axios.patch(`/api/project/${id}`, {name: this.projectName})
                   .then(res=>{
@@ -120,12 +117,8 @@ import axios from "axios";
                   .catch((error)=>{
                       this.message = (error.response.data.message);
                   })
-
-
-          }
-
       },
-
+//запуск времени у таска с переданным id
          updateRunTask(id){
 
              axios.patch(`/api/projects/tasks/${id}/start`)
@@ -134,16 +127,19 @@ import axios from "axios";
 
                  })
          },
+         //stop времени у таска с переданным id
          updateStopTask(id){
              axios.patch(`/api/projects/tasks/${id}/stop`)
                  .then(res=>{
                      this.getProject();
                  })
          },
+         //метод для занесения в editProjectId данных
       changeEditProjectId(id,name){
           this.editProjectId = id;
           this.projectName = name;
       },
+         //нужно ли отобразить поле редактирования для проекта с переданным id
       isEdit(id){
               return this.editProjectId === id;
       },
@@ -152,7 +148,8 @@ import axios from "axios";
       getId(id){
        this.idProject = id;
       },
-         getTotalTimeForProject(tasks=false, task=false){
+         //для вывода времени по всему проекту передаем tasks, для времени задачи соответственно передаем task
+         getTotalTime(tasks=false, task=false){
              let count = 0;
              if (tasks){
                  for (let task of tasks) {
@@ -180,7 +177,7 @@ import axios from "axios";
 
          },
 
-
+//метод для формирования атрибутов строк в соответствии с id
          getStrForId(id, is=false){
           if(is){
               return "#multiCollapseExample".concat(id);
@@ -190,6 +187,7 @@ import axios from "axios";
           }
 
          },
+         //тоггл кнопки Показать задачи/скрыть задачи
          clickBtn(idDomElement) {
            let element = document.getElementById(idDomElement);
           let text = element.innerHTML;
